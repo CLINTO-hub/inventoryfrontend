@@ -13,10 +13,11 @@ const Category = () => {
     { id: 4, name: 'Home & Garden', description: 'Home improvement and garden supplies', createdAt: '2024-01-18' },
     { id: 5, name: 'Sports', description: 'Sports equipment and accessories', createdAt: '2024-01-19' }
   ]);
+
   const [formData, setFormData] = useState({
     name: '',
     description: ''
-  });
+  });   
 
   const handleTabClick = (tab) => {
     setActiveTab(tab);
@@ -303,8 +304,8 @@ const Category = () => {
 
       {/* Create/Edit Category Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+        <div className="fixed inset-0 bg-gray-500/5 backdrop-blur-md flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-10 w-full max-w-md mx-4">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">
               {editingCategory ? 'Edit Category' : 'Create New Category'}
             </h3>
