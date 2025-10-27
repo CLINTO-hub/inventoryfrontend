@@ -118,12 +118,12 @@ const Dashboard = () => {
         {/* Dark Mode Toggle */}
         <div className="absolute bottom-6 left-6 right-6">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">🌙 Darkmode</span>
-            <div className="relative">
+      
+            {/* <div className="relative">
               <input type="checkbox" className="sr-only" />
               <div className="w-10 h-6 bg-gray-300 rounded-full shadow-inner"></div>
               <div className="absolute top-1 right-1 w-4 h-4 bg-blue-600 rounded-full shadow transform transition-transform"></div>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
@@ -162,7 +162,7 @@ const Dashboard = () => {
                 />
                 <div>
                   <p className="text-sm font-medium text-gray-800">Randy Riley</p>
-                  <p className="text-xs text-gray-500">randy.riley@gmail.com</p>
+                  <p className="text-xs text-gray-500">clintogeorge007@gmail.com</p>
                 </div>
               </div>
             </div>
@@ -183,7 +183,7 @@ const Dashboard = () => {
                   </svg>
                 </div>
                 <div className="ml-4">
-                  <h3 className="text-lg font-semibold text-gray-800">Notification</h3>
+                  <h3 className="text-lg font-semibold text-gray-800">Category</h3>
                   <p className="text-sm text-gray-600">5 Unread notification</p>
                 </div>
               </div>
@@ -198,7 +198,7 @@ const Dashboard = () => {
                   </svg>
                 </div>
                 <div className="ml-4">
-                  <h3 className="text-lg font-semibold text-gray-800">Message</h3>
+                  <h3 className="text-lg font-semibold text-gray-800">Product</h3>
                   <p className="text-sm text-gray-600">5 Unread notification</p>
                 </div>
               </div>
@@ -213,7 +213,7 @@ const Dashboard = () => {
                   </svg>
                 </div>
                 <div className="ml-4">
-                  <h3 className="text-lg font-semibold text-gray-800">Calendar</h3>
+                  <h3 className="text-lg font-semibold text-gray-800">Orders</h3>
                   <p className="text-sm text-gray-600">5 Unread notification</p>
                 </div>
               </div>
@@ -239,7 +239,7 @@ const Dashboard = () => {
                   </svg>
                 </div>
                 <div className="ml-4">
-                  <h3 className="text-lg font-semibold text-gray-800">Calendar</h3>
+                  <h3 className="text-lg font-semibold text-gray-800">Total Revenue</h3>
                   <p className="text-sm text-gray-600">5 Unread notification</p>
                 </div>
               </div>

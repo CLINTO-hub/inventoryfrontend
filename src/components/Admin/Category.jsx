@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const Category = () => {
   const navigate = useNavigate();
@@ -13,6 +14,8 @@ const Category = () => {
     { id: 4, name: 'Home & Garden', description: 'Home improvement and garden supplies', createdAt: '2024-01-18' },
     { id: 5, name: 'Sports', description: 'Sports equipment and accessories', createdAt: '2024-01-19' }
   ]);
+
+   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const [formData, setFormData] = useState({
     name: '',
@@ -39,19 +42,37 @@ const Category = () => {
     });
   };
 
-  const handleCreateCategory = () => {
-    if (formData.name.trim()) {
-      const newCategory = {
-        id: categories.length + 1,
-        name: formData.name,
-        description: formData.description,
-        createdAt: new Date().toISOString().split('T')[0]
-      };
+ const handleCreateCategory = async () => {
+  if (formData.name.trim()) {
+
+    console.log(formData);
+    
+    try {
+      const response = await axios.post(
+        `${BASE_URL}/category/createcategory`,
+        {
+          name: formData.name,
+          description: formData.description,
+          createdBy: localStorage.getItem("adminId")
+        },
+        {
+          withCredentials: true, // 🔑 Important: send cookies automatically
+        }
+      );
+
+      const newCategory = response.data.category; // assuming backend returns created category
       setCategories([...categories, newCategory]);
-      setFormData({ name: '', description: '' });
+      setFormData({ name: "", description: "" });
       setShowCreateModal(false);
+
+      alert("✅ Category created successfully!");
+    } catch (error) {
+      console.error("Error creating category:", error);
+      alert(error.response?.data?.message || "❌ Failed to create category");
     }
-  };
+  }
+};
+
 
   const handleEditCategory = (category) => {
     setEditingCategory(category);

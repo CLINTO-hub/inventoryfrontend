@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios'; 
 
 const Product = () => {
   const navigate = useNavigate();
@@ -63,6 +64,8 @@ const Product = () => {
 
   const categories = ['Electronics', 'Clothing', 'Books', 'Home & Garden', 'Sports'];
 
+   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
   const handleTabClick = (tab) => {
     setActiveTab(tab);
     if (tab === 'dashboard') {
@@ -83,22 +86,63 @@ const Product = () => {
     });
   };
 
-  const handleCreateProduct = () => {
-    if (formData.name.trim() && formData.perDayPrice && formData.categoryName && formData.stock) {
+  const handleCreateProduct = async () => {
+  if (
+    formData.name.trim() &&
+    formData.perDayPrice &&
+    formData.categoryId && // ✅ ensure categoryId is available
+    formData.categoryName &&
+    formData.stock
+  ) {
+    try {
+      const createdBy = localStorage.getItem("adminId"); // 🧠 Get adminId from localStorage
+
+      if (!createdBy) {
+        alert("⚠️ Admin ID not found. Please log in again.");
+        return;
+      }
+
+      // Prepare payload for backend
       const newProduct = {
-        id: products.length + 1,
-        name: formData.name,
+        name: formData.name.trim(),
         description: formData.description,
         perDayPrice: parseFloat(formData.perDayPrice),
+        categoryId: formData.categoryId,
         categoryName: formData.categoryName,
         stock: parseInt(formData.stock),
-        createdAt: new Date().toISOString().split('T')[0]
+        createdBy, // ✅ comes from localStorage
       };
-      setProducts([...products, newProduct]);
-      setFormData({ name: '', description: '', perDayPrice: '', categoryName: '', stock: '' });
+
+      // Make API call
+      const response = await axios.post(
+        `${BASE_URL}/product/createproduct`,
+        newProduct,
+        {
+          withCredentials: true, // ✅ send cookie with the request
+        }
+      );
+
+      const createdProduct = response.data.product;
+      setProducts([...products, createdProduct]); // update UI
+      setFormData({
+        name: "",
+        description: "",
+        perDayPrice: "",
+        categoryId: "",
+        categoryName: "",
+        stock: "",
+      });
       setShowCreateModal(false);
+
+      alert("✅ Product created successfully!");
+    } catch (error) {
+      console.error("Error creating product:", error);
+      alert(error.response?.data?.message || "❌ Failed to create product");
     }
-  };
+  } else {
+    alert("⚠️ Please fill in all required fields.");
+  }
+};
 
   const handleEditProduct = (product) => {
     setEditingProduct(product);
@@ -411,7 +455,7 @@ const Product = () => {
                   step="0.01"
                 />
               </div>
-
+              
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
                 <select
