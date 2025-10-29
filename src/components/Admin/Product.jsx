@@ -1,57 +1,58 @@
-import React, { useState } from 'react';
+import React, { useState , useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios'; 
+import axios from 'axios';
 
 const Product = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('product');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+
   const [products, setProducts] = useState([
-    { 
-      id: 1, 
-      name: 'iPhone 15 Pro', 
-      description: 'Latest Apple smartphone with advanced features', 
+    {
+      id: 1,
+      name: 'iPhone 15 Pro',
+      description: 'Latest Apple smartphone with advanced features',
       perDayPrice: 50,
       categoryName: 'Electronics',
       stock: 25,
-      createdAt: '2024-01-15' 
+      createdAt: '2024-01-15'
     },
-    { 
-      id: 2, 
-      name: 'Nike Air Max', 
-      description: 'Comfortable running shoes', 
+    {
+      id: 2,
+      name: 'Nike Air Max',
+      description: 'Comfortable running shoes',
       perDayPrice: 15,
       categoryName: 'Sports',
       stock: 50,
-      createdAt: '2024-01-16' 
+      createdAt: '2024-01-16'
     },
-    { 
-      id: 3, 
-      name: 'MacBook Pro', 
-      description: 'High-performance laptop for professionals', 
+    {
+      id: 3,
+      name: 'MacBook Pro',
+      description: 'High-performance laptop for professionals',
       perDayPrice: 100,
       categoryName: 'Electronics',
       stock: 10,
-      createdAt: '2024-01-17' 
+      createdAt: '2024-01-17'
     },
-    { 
-      id: 4, 
-      name: 'Designer T-Shirt', 
-      description: 'Premium cotton t-shirt', 
+    {
+      id: 4,
+      name: 'Designer T-Shirt',
+      description: 'Premium cotton t-shirt',
       perDayPrice: 8,
       categoryName: 'Clothing',
       stock: 100,
-      createdAt: '2024-01-18' 
+      createdAt: '2024-01-18'
     },
-    { 
-      id: 5, 
-      name: 'Programming Book', 
-      description: 'Complete guide to React development', 
+    {
+      id: 5,
+      name: 'Programming Book',
+      description: 'Complete guide to React development',
       perDayPrice: 5,
       categoryName: 'Books',
       stock: 30,
-      createdAt: '2024-01-19' 
+      createdAt: '2024-01-19'
     }
   ]);
   const [formData, setFormData] = useState({
@@ -62,9 +63,26 @@ const Product = () => {
     stock: ''
   });
 
-  const categories = ['Electronics', 'Clothing', 'Books', 'Home & Garden', 'Sports'];
+  const [categories, setCategories] = useState([]);
 
-   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}/category/getallcategories`, {
+          withCredentials: true,
+        });
+        setCategories(response.data.categories);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        alert(error.response?.data?.message || "❌ Failed to load categories");
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const handleTabClick = (tab) => {
     setActiveTab(tab);
@@ -87,62 +105,71 @@ const Product = () => {
   };
 
   const handleCreateProduct = async () => {
-  if (
-    formData.name.trim() &&
-    formData.perDayPrice &&
-    formData.categoryId && // ✅ ensure categoryId is available
-    formData.categoryName &&
-    formData.stock
-  ) {
-    try {
-      const createdBy = localStorage.getItem("adminId"); // 🧠 Get adminId from localStorage
+    console.log("Im isisde");
+    console.log(formData);
 
-      if (!createdBy) {
-        alert("⚠️ Admin ID not found. Please log in again.");
-        return;
-      }
 
-      // Prepare payload for backend
-      const newProduct = {
-        name: formData.name.trim(),
-        description: formData.description,
-        perDayPrice: parseFloat(formData.perDayPrice),
-        categoryId: formData.categoryId,
-        categoryName: formData.categoryName,
-        stock: parseInt(formData.stock),
-        createdBy, // ✅ comes from localStorage
-      };
+    if (
+      formData.name.trim() &&
+      formData.perDayPrice &&
+      formData.categoryId && // ✅ ensure categoryId is available
+      formData.categoryName &&
+      formData.stock
+    ) {
+      try {
+        const createdBy = localStorage.getItem("adminId");
+        console.log(createdBy);
+        // 🧠 Get adminId from localStorage
 
-      // Make API call
-      const response = await axios.post(
-        `${BASE_URL}/product/createproduct`,
-        newProduct,
-        {
-          withCredentials: true, // ✅ send cookie with the request
+        if (!createdBy) {
+          alert("⚠️ Admin ID not found. Please log in again.");
+          return;
         }
-      );
 
-      const createdProduct = response.data.product;
-      setProducts([...products, createdProduct]); // update UI
-      setFormData({
-        name: "",
-        description: "",
-        perDayPrice: "",
-        categoryId: "",
-        categoryName: "",
-        stock: "",
-      });
-      setShowCreateModal(false);
+        // Prepare payload for backend
+        const newProduct = {
+          name: formData.name.trim(),
+          description: formData.description,
+          perDayPrice: parseFloat(formData.perDayPrice),
+          categoryId: formData.categoryId,
+          categoryName: formData.categoryName,
+          stock: parseInt(formData.stock),
+          createdBy, // ✅ comes from localStorage
+        };
 
-      alert("✅ Product created successfully!");
-    } catch (error) {
-      console.error("Error creating product:", error);
-      alert(error.response?.data?.message || "❌ Failed to create product");
+        console.log("enterdedProduct", newProduct);
+
+
+        // Make API call
+        const response = await axios.post(
+          `${BASE_URL}/product/createproduct`,
+          newProduct,
+          {
+            withCredentials: true, // ✅ send cookie with the request
+          }
+        );
+
+        const createdProduct = response.data.product;
+        setProducts([...products, createdProduct]); // update UI
+        setFormData({
+          name: "",
+          description: "",
+          perDayPrice: "",
+          categoryId: "",
+          categoryName: "",
+          stock: "",
+        });
+        setShowCreateModal(false);
+
+        alert("✅ Product created successfully!");
+      } catch (error) {
+        console.error("Error creating product:", error);
+        alert(error.response?.data?.message || "❌ Failed to create product");
+      }
+    } else {
+      alert("⚠️ Please fill in all required fields.");
     }
-  } else {
-    alert("⚠️ Please fill in all required fields.");
-  }
-};
+  };
 
   const handleEditProduct = (product) => {
     setEditingProduct(product);
@@ -158,16 +185,16 @@ const Product = () => {
 
   const handleUpdateProduct = () => {
     if (formData.name.trim() && formData.perDayPrice && formData.categoryName && formData.stock) {
-      setProducts(products.map(prod => 
-        prod.id === editingProduct.id 
-          ? { 
-              ...prod, 
-              name: formData.name, 
-              description: formData.description,
-              perDayPrice: parseFloat(formData.perDayPrice),
-              categoryName: formData.categoryName,
-              stock: parseInt(formData.stock)
-            }
+      setProducts(products.map(prod =>
+        prod.id === editingProduct.id
+          ? {
+            ...prod,
+            name: formData.name,
+            description: formData.description,
+            perDayPrice: parseFloat(formData.perDayPrice),
+            categoryName: formData.categoryName,
+            stock: parseInt(formData.stock)
+          }
           : prod
       ));
       setFormData({ name: '', description: '', perDayPrice: '', categoryName: '', stock: '' });
@@ -215,11 +242,10 @@ const Product = () => {
           <div className="px-4">
             <button
               onClick={() => handleTabClick('dashboard')}
-              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg mb-2 transition-colors ${
-                activeTab === 'dashboard'
+              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg mb-2 transition-colors ${activeTab === 'dashboard'
                   ? 'bg-gray-200 text-blue-600 border-l-4 border-blue-600'
                   : 'text-gray-600 hover:bg-gray-200'
-              }`}
+                }`}
             >
               <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -229,11 +255,10 @@ const Product = () => {
 
             <button
               onClick={() => handleTabClick('category')}
-              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg mb-2 transition-colors ${
-                activeTab === 'category'
+              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg mb-2 transition-colors ${activeTab === 'category'
                   ? 'bg-gray-200 text-blue-600 border-l-4 border-blue-600'
                   : 'text-gray-600 hover:bg-gray-200'
-              }`}
+                }`}
             >
               <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -243,11 +268,10 @@ const Product = () => {
 
             <button
               onClick={() => handleTabClick('product')}
-              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg mb-2 transition-colors ${
-                activeTab === 'product'
+              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg mb-2 transition-colors ${activeTab === 'product'
                   ? 'bg-gray-200 text-blue-600 border-l-4 border-blue-600'
                   : 'text-gray-600 hover:bg-gray-200'
-              }`}
+                }`}
             >
               <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
@@ -255,33 +279,31 @@ const Product = () => {
               Product
             </button>
 
-          <button
-            onClick={() => handleTabClick('order')}
-            className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg mb-2 transition-colors ${
-              activeTab === 'order'
-                ? 'bg-gray-200 text-blue-600 border-l-4 border-blue-600'
-                : 'text-gray-600 hover:bg-gray-200'
-            }`}
-          >
-            <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2h6v2m-7 4h8a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2h2" />
-            </svg>
-            Order
-          </button>
+            <button
+              onClick={() => handleTabClick('order')}
+              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg mb-2 transition-colors ${activeTab === 'order'
+                  ? 'bg-gray-200 text-blue-600 border-l-4 border-blue-600'
+                  : 'text-gray-600 hover:bg-gray-200'
+                }`}
+            >
+              <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2h6v2m-7 4h8a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2h2" />
+              </svg>
+              Order
+            </button>
 
-          <button
-            onClick={() => handleTabClick('billing')}
-            className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg mb-2 transition-colors ${
-              activeTab === 'billing'
-                ? 'bg-gray-200 text-blue-600 border-l-4 border-blue-600'
-                : 'text-gray-600 hover:bg-gray-200'
-            }`}
-          >
-            <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 14l2-2 4 4m0 0l4-4m-4 4V7" />
-            </svg>
-            Billing
-          </button>
+            <button
+              onClick={() => handleTabClick('billing')}
+              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg mb-2 transition-colors ${activeTab === 'billing'
+                  ? 'bg-gray-200 text-blue-600 border-l-4 border-blue-600'
+                  : 'text-gray-600 hover:bg-gray-200'
+                }`}
+            >
+              <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 14l2-2 4 4m0 0l4-4m-4 4V7" />
+              </svg>
+              Billing
+            </button>
           </div>
         </nav>
 
@@ -304,7 +326,7 @@ const Product = () => {
         <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-gray-800">Product Management</h1>
-            
+
             <div className="flex items-center space-x-4">
               {/* Search Bar */}
               <div className="relative">
@@ -416,7 +438,7 @@ const Product = () => {
             <h3 className="text-lg font-semibold text-gray-800 mb-4">
               {editingProduct ? 'Edit Product' : 'Create New Product'}
             </h3>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Product Name</label>
@@ -429,7 +451,7 @@ const Product = () => {
                   placeholder="Enter product name"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
                 <textarea
@@ -455,20 +477,30 @@ const Product = () => {
                   step="0.01"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
                 <select
                   name="categoryName"
                   value={formData.categoryName}
-                  onChange={handleInputChange}
+                  onChange={(e) => {
+                    const selectedCategory = categories.find(cat => cat.name === e.target.value);
+                    setFormData({
+                      ...formData,
+                      categoryName: selectedCategory?.name || "",
+                      categoryId: selectedCategory?._id || "",
+                    });
+                  }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Select a category</option>
                   {categories.map((category) => (
-                    <option key={category} value={category}>{category}</option>
+                    <option key={category._id} value={category.name}>
+                      {category.name}
+                    </option>
                   ))}
                 </select>
+
               </div>
 
               <div>
@@ -484,7 +516,7 @@ const Product = () => {
                 />
               </div>
             </div>
-            
+
             <div className="flex justify-end space-x-3 mt-6">
               <button
                 onClick={handleModalClose}

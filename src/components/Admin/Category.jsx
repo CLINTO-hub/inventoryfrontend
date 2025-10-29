@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -7,20 +7,28 @@ const Category = () => {
   const [activeTab, setActiveTab] = useState('category');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
-  const [categories, setCategories] = useState([
-    { id: 1, name: 'Electronics', description: 'Electronic devices and gadgets', createdAt: '2024-01-15' },
-    { id: 2, name: 'Clothing', description: 'Fashion and apparel items', createdAt: '2024-01-16' },
-    { id: 3, name: 'Books', description: 'Books and educational materials', createdAt: '2024-01-17' },
-    { id: 4, name: 'Home & Garden', description: 'Home improvement and garden supplies', createdAt: '2024-01-18' },
-    { id: 5, name: 'Sports', description: 'Sports equipment and accessories', createdAt: '2024-01-19' }
-  ]);
+  const [categories, setCategories] = useState([]);
 
-   const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}/category/getallcategories`);
+        setCategories(response.data.categories);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        alert(error.response?.data?.message || "Failed to load categories");
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const [formData, setFormData] = useState({
     name: '',
     description: ''
-  });   
+  });
 
   const handleTabClick = (tab) => {
     setActiveTab(tab);
@@ -42,36 +50,36 @@ const Category = () => {
     });
   };
 
- const handleCreateCategory = async () => {
-  if (formData.name.trim()) {
+  const handleCreateCategory = async () => {
+    if (formData.name.trim()) {
 
-    console.log(formData);
-    
-    try {
-      const response = await axios.post(
-        `${BASE_URL}/category/createcategory`,
-        {
-          name: formData.name,
-          description: formData.description,
-          createdBy: localStorage.getItem("adminId")
-        },
-        {
-          withCredentials: true, // 🔑 Important: send cookies automatically
-        }
-      );
+      console.log(formData);
 
-      const newCategory = response.data.category; // assuming backend returns created category
-      setCategories([...categories, newCategory]);
-      setFormData({ name: "", description: "" });
-      setShowCreateModal(false);
+      try {
+        const response = await axios.post(
+          `${BASE_URL}/category/createcategory`,
+          {
+            name: formData.name,
+            description: formData.description,
+            createdBy: localStorage.getItem("adminId")
+          },
+          {
+            withCredentials: true, // 🔑 Important: send cookies automatically
+          }
+        );
 
-      alert("✅ Category created successfully!");
-    } catch (error) {
-      console.error("Error creating category:", error);
-      alert(error.response?.data?.message || "❌ Failed to create category");
+        const newCategory = response.data.category; // assuming backend returns created category
+        setCategories([...categories, newCategory]);
+        setFormData({ name: "", description: "" });
+        setShowCreateModal(false);
+
+        alert("✅ Category created successfully!");
+      } catch (error) {
+        console.error("Error creating category:", error);
+        alert(error.response?.data?.message || "❌ Failed to create category");
+      }
     }
-  }
-};
+  };
 
 
   const handleEditCategory = (category) => {
@@ -85,8 +93,8 @@ const Category = () => {
 
   const handleUpdateCategory = () => {
     if (formData.name.trim()) {
-      setCategories(categories.map(cat => 
-        cat.id === editingCategory.id 
+      setCategories(categories.map(cat =>
+        cat.id === editingCategory.id
           ? { ...cat, name: formData.name, description: formData.description }
           : cat
       ));
@@ -135,11 +143,10 @@ const Category = () => {
           <div className="px-4">
             <button
               onClick={() => handleTabClick('dashboard')}
-              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg mb-2 transition-colors ${
-                activeTab === 'dashboard'
+              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg mb-2 transition-colors ${activeTab === 'dashboard'
                   ? 'bg-gray-200 text-blue-600 border-l-4 border-blue-600'
                   : 'text-gray-600 hover:bg-gray-200'
-              }`}
+                }`}
             >
               <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -149,11 +156,10 @@ const Category = () => {
 
             <button
               onClick={() => handleTabClick('category')}
-              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg mb-2 transition-colors ${
-                activeTab === 'category'
+              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg mb-2 transition-colors ${activeTab === 'category'
                   ? 'bg-gray-200 text-blue-600 border-l-4 border-blue-600'
                   : 'text-gray-600 hover:bg-gray-200'
-              }`}
+                }`}
             >
               <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -163,11 +169,10 @@ const Category = () => {
 
             <button
               onClick={() => handleTabClick('product')}
-              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg mb-2 transition-colors ${
-                activeTab === 'product'
+              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg mb-2 transition-colors ${activeTab === 'product'
                   ? 'bg-gray-200 text-blue-600 border-l-4 border-blue-600'
                   : 'text-gray-600 hover:bg-gray-200'
-              }`}
+                }`}
             >
               <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
@@ -175,33 +180,31 @@ const Category = () => {
               Product
             </button>
 
-          <button
-            onClick={() => handleTabClick('order')}
-            className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg mb-2 transition-colors ${
-              activeTab === 'order'
-                ? 'bg-gray-200 text-blue-600 border-l-4 border-blue-600'
-                : 'text-gray-600 hover:bg-gray-200'
-            }`}
-          >
-            <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2h6v2m-7 4h8a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2h2" />
-            </svg>
-            Order
-          </button>
+            <button
+              onClick={() => handleTabClick('order')}
+              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg mb-2 transition-colors ${activeTab === 'order'
+                  ? 'bg-gray-200 text-blue-600 border-l-4 border-blue-600'
+                  : 'text-gray-600 hover:bg-gray-200'
+                }`}
+            >
+              <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2h6v2m-7 4h8a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2h2" />
+              </svg>
+              Order
+            </button>
 
-          <button
-            onClick={() => handleTabClick('billing')}
-            className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg mb-2 transition-colors ${
-              activeTab === 'billing'
-                ? 'bg-gray-200 text-blue-600 border-l-4 border-blue-600'
-                : 'text-gray-600 hover:bg-gray-200'
-            }`}
-          >
-            <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 14l2-2 4 4m0 0l4-4m-4 4V7" />
-            </svg>
-            Billing
-          </button>
+            <button
+              onClick={() => handleTabClick('billing')}
+              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg mb-2 transition-colors ${activeTab === 'billing'
+                  ? 'bg-gray-200 text-blue-600 border-l-4 border-blue-600'
+                  : 'text-gray-600 hover:bg-gray-200'
+                }`}
+            >
+              <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 14l2-2 4 4m0 0l4-4m-4 4V7" />
+              </svg>
+              Billing
+            </button>
           </div>
         </nav>
 
@@ -224,7 +227,7 @@ const Category = () => {
         <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-gray-800">Category Management</h1>
-            
+
             <div className="flex items-center space-x-4">
               {/* Search Bar */}
               <div className="relative">
@@ -289,7 +292,7 @@ const Category = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {categories.map((category) => (
-                    <tr key={category.id} className="hover:bg-gray-50">
+                    <tr key={category._id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{category.id}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{category.name}</td>
                       <td className="px-6 py-4 text-sm text-gray-500">{category.description}</td>
@@ -305,7 +308,7 @@ const Category = () => {
                             </svg>
                           </button>
                           <button
-                            onClick={() => handleDeleteCategory(category.id)}
+                            onClick={() => handleDeleteCategory(category._id)}
                             className="text-red-600 hover:text-red-900 transition-colors"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -317,6 +320,7 @@ const Category = () => {
                     </tr>
                   ))}
                 </tbody>
+
               </table>
             </div>
           </div>
@@ -330,7 +334,7 @@ const Category = () => {
             <h3 className="text-lg font-semibold text-gray-800 mb-4">
               {editingCategory ? 'Edit Category' : 'Create New Category'}
             </h3>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Category Name</label>
@@ -343,7 +347,7 @@ const Category = () => {
                   placeholder="Enter category name"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
                 <textarea
@@ -356,7 +360,7 @@ const Category = () => {
                 />
               </div>
             </div>
-            
+
             <div className="flex justify-end space-x-3 mt-6">
               <button
                 onClick={handleModalClose}
